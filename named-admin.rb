@@ -9,7 +9,10 @@
 
 # makes sure the class definition files is found
 $: << File.expand_path(File.dirname(__FILE__) + '/../lib')
+
+require "yaml"
 require "lib/NamedAdmin"
+
 
 # test if any arguments are passed
 if ARGV.length < 1

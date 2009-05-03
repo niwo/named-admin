@@ -7,8 +7,6 @@
 # Reads, writes and sorts the file and finds, inserts, deletes and counts zones
 #
 
-require "yaml"
-
 class NamedConf
   attr_accessor :zones, :head, :tail
 

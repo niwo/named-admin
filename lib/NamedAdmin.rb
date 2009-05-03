@@ -1,3 +1,4 @@
+require "yaml"
 require "lib/NamedConf"
 
 ZONE_TMPL = YAML.load_file( 'config/zones.yml' )
