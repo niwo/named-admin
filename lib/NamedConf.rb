@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 #
-# named-admin Copyright (C) 2008 Nik Wolfgramm, licesnsed under GPL
+# named-admin Copyright (C) 2008 Nik Wolfgramm, licensed under GPL
 #
 # = NamedConf.rb: Classes for handling a bind named.conf configuration file
 # Reads, writes and sorts the file and finds, inserts, deletes and counts zones
