@@ -1,0 +1,5 @@
+
+named-admin Copyright (C) 2008 Nik Wolfgramm, licesnsed under GPL
+
+named-admin.rb: command line tool for bind named.conf zone administration
+Reads, writes and sorts the file and finds, inserts, deletes and counts zones
