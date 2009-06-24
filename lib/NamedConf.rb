@@ -126,7 +126,7 @@ class NamedConf
 
     def initialize(name, zclass = 'IN', comments = '', *options)
       @name = name
-      zclass == nil || zclass[/^$/]  ? @zclass = 'IN' : @zclass = zclass.strip
+      zclass == nil || zclass.empty?  ? @zclass = 'IN' : @zclass = zclass.strip
       options ? @options = [] : @options = options
       @comments = comments
     end
@@ -135,7 +135,16 @@ class NamedConf
       out = "zone \"#{@name}\" #{@zclass} {\n"
       out = comments << out unless comments.empty?
       for option in @options
-        option.each {|key, value| out << "  #{key} #{value.gsub(/ +/, '')};\n"}
+        option.each {|key, value|
+          # remove all white spaces
+          value.gsub!(/\s+/, '')
+ 	  # insert white spaces after/before curly brackets
+          value.gsub!(/(\{)(\S+)/) { '{ ' + $2 }
+          value.gsub!(/(.+\S+)(\})/) { $1 + ' }' }
+          # insert white space after semicolons
+          value.gsub!(/(;)(\S)/) { $1 + ' ' + $2 }
+          # finally insert the full option string
+	  out << "  #{key} #{value};\n"}
       end
       out << "};\n"
     end

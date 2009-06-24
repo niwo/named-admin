@@ -1,34 +1,21 @@
-require "yaml"
-require "lib/NamedConf"
-
-ZONE_TMPL = YAML.load_file( 'config/zones.yml' )
+require APP_PATH + "/lib/NamedConf"
 
 class NamedAdmin
   
-  def initialize(file)
+  def initialize(file, zone_tmpl = {})
     @file = file
     @nc = NamedConf.new(@file)
+    @zone_tmpl = zone_tmpl
   end
   
-  def self.usage
-    puts "Usage:"
-    puts "Search a zone by name:\t named-admin -s | --search-zone [zone name]"
-    puts "Insert a zone by name:\t named-admin -i | --insert-zone [zone name]"
-    puts "Delete a zone by name:\t named-admin -d | --delete-zone [zone name]"
-    puts "Print (parsed, sorted):\t named-admin -p | --print"
-    puts "Write (parsed, sorted):\t named-admin -w | --write"
-    puts "Count number of zones:\t named-admin -c | --count--zones"
-    exit
-  end
-
   def count_zones
     puts "Scanning #{@file}..."
     @nc.read
     puts "Number of zones found: #{@nc.zones.size}"
   end
 
-  def search_zone
-    name = get_args("Enter zone name:")
+  def search_zone(name = nil)
+    name = get_args("Enter zone name:") unless name
     @nc.read
     if zone = @nc.find_zone(name)
       puts zone.print
@@ -37,9 +24,9 @@ class NamedAdmin
     end
   end
 
-  def insert_zone
-    name = get_args("Please enter the name of the zone you want to insert:")
-    if ZONE_TMPL.keys.length > 1
+  def insert_zone(name = nil)
+    name = get_args("Please enter the name of the zone you want to insert:") unless name
+    if @zone_tmpl.keys.length > 1
       template = get_args("Please select a zone template:\n#{list_zone_tmpl}", 2)
     else
       template = 0
@@ -49,17 +36,13 @@ class NamedAdmin
     if @nc.insert_zone(name, zone)
       puts "Add zone #{name}:"
       write(@nc)
-      # check file syntax with named-checkconf if enbled
-      if CONFIG['named-checkconf']['enable'] || false
-        named_checkconf
-      end 
     else
       puts "Zone already exists."
     end
   end
 
-  def delete_zone
-    name = get_args("Please enter the name of the zone you want to delete:")
+  def delete_zone(name = nil)
+    name = get_args("Please enter the name of the zone you want to delete:") unless name
     @nc.read
     @nc.sort_zones
     if @nc.delete_zone(name)
@@ -83,8 +66,8 @@ class NamedAdmin
   end
   
   def named_checkconf
-    error = %x["#{CONFIG['named-checkconf']['path']} #{CONFIG['named.conf']['path']}"]
-    error.empty? ? 
+    error = %x[#{CONFIG['named-checkconf']['path']} #{@file}]
+    error.empty? ?
       puts("named-checkconf: syntax of #{@file} OK") :
       puts("named-checkconf: syntax error in #{@file}: \n#{error}")
   end
@@ -92,8 +75,7 @@ class NamedAdmin
   private
 
   def write(nc)
-    puts "Write changes to #{@file}?"
-    print "(y/n) "
+    print "Write changes to #{@file} [y/N]: "
     if $stdin.gets.chomp == 'y'
       begin 
         nc.write
@@ -119,7 +101,7 @@ class NamedAdmin
   def list_zone_tmpl
     n = 1
     list = ""
-    ZONE_TMPL.keys.sort.each do |zone_key|
+    @zone_tmpl.keys.sort.each do |zone_key|
       list << "#{n}: #{zone_key}\n"
       n = n + 1
     end
@@ -127,7 +109,7 @@ class NamedAdmin
   end
   
   def template_to_zone(index, zone_name)
-    template = ZONE_TMPL[ZONE_TMPL.keys[index - 1]]
+    template = @zone_tmpl[@zone_tmpl.keys[index - 1]]
     zone = []
     template.each_pair {|key,value| zone << {key => value.sub('{{name}}', zone_name)} }
     zone
