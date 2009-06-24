@@ -5,16 +5,19 @@ Reads, writes and sorts the file and finds, inserts, deletes and counts zones.
 Zones can be inserted based on customizable zone templates.
 
 h1. Usage
+
 Launch the main ruby script: named-admin COMMAND [options]
 Please see <code>named-admin --help</code> for commands and options.
 
 h1. Configuration
 
 h2. config/config.yml
+
 * specify the default path to you named.conf bind configuration file
 * activate automatic syntax checking with named-checkconf
 
 h2. config/zones.yml
+
 * define different zone templates which can be used by the "add zone" action
 
 h1. Credits
