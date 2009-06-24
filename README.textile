@@ -7,7 +7,8 @@ Zones can be inserted based on customizable zone templates.
 h1. Usage
 
 Launch the main ruby script: named-admin COMMAND [options]
-Please see <code>named-admin --help</code> for commands and options.
+
+Check out <code>named-admin --help</code> for commands and options.
 
 h1. Configuration
 
