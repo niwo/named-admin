@@ -1,6 +1,7 @@
 h1. named-admin 
 
-named-admin: command line tool for bind named.conf zone administration
+named-admin is a command line tool for bind named.conf zone administration.
+
 Reads, writes and sorts the file and finds, inserts, deletes and counts zones.
 Zones can be inserted based on customizable zone templates.
 
