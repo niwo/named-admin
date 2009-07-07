@@ -19,23 +19,23 @@ options = {}
 optparse = OptionParser.new do |opts|
   opts.banner = "Usage: named-admin COMMAND [options]"
   opts.program_name = "named-admin"
-  opts.version = "1.0" 
+  opts.version = "1.1" 
   opts.separator ""
   opts.separator "List of Commands:"
   opts.separator ""
-  opts.separator "search \t Search for a zone"
-  opts.separator "count \t Count zone"
-  opts.separator "add \t Add a zone"
-  opts.separator "delete \t Delete a zone"
-  opts.separator "print \t Print the all zones (parsed, sorted)"
-  opts.separator "parse \t Parse all zones and write them back to the file (parsed, sorted)"
+  opts.separator "  find [name] \t\t Find zone(s) by name, asterix [*] can by used as wildcard"
+  opts.separator "  count \t\t Count zones"
+  opts.separator "  add [zone-name] \t Add a zone to the zone file"
+  opts.separator "  remove [zone-name] \t Remove a zone from the zone file"
+  opts.separator "  print \t\t Print all zones (parsed, sorted)"
+  opts.separator "  parse \t\t Parse all zones and write them back to the zone file (parsed, sorted)"
   opts.separator ""
   opts.separator "Options:"
 
   # Define the options, and what they do
-  opts.on( '-z', '--zone-name ZONE', 'Name of zone to manipulate' ) do |zone|
-    options[:zone] = zone
-  end
+  #opts.on( '-z', '--zone-name ZONE', 'Name of zone to manipulate' ) do |zone|
+  #  options[:zone] = zone
+  #end
 
   options[:check] = true
   opts.on( '--[no-]check', 'Checks the configuration with named-checkconf' ) do |check|
@@ -98,13 +98,13 @@ do_checkconf = false
 
 begin
   case options[:run]
-  when "search"
-    na.search_zone(options[:zone])
-  when "delete"
-    na.delete_zone(options[:zone])
+  when "find"
+    na.find_zones #(options[:zone])
+  when "remove"
+    na.remove_zone #(options[:zone])
     do_checkconf = true
   when "add"
-    na.insert_zone(options[:zone])
+    na.add_zone #(options[:zone])
     do_checkconf = true
   when "parse"
     na.parse

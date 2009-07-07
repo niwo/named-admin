@@ -1,6 +1,7 @@
 # specify the location of the named.conf file
 named.conf:
-    path: '/var/named/chroot/etc/named.conf'
+    path: '/var/named/chroot/etc/named.local-zones.conf'
+    bind-restart-cmd: 'service named restart'
 
 # settings for automatically testing the configuration with named-checkconf
 named-checkconf:

@@ -96,22 +96,26 @@ class NamedConf
     @zones.sort! {|z1, z2| z1.name <=> z2.name }
   end
 
-  def find_zone(name)
-    return @zones.find {|z| z.name == name }
+  def find_zones(name)
+    pattern = name.gsub(/\*/, '.*')
+    return @zones.find_all {|z| z.name =~ /^#{pattern}$/ }
   end
 
-  def delete_zone(name)
-    zone = find_zone(name)
-    if zone
-      @zones.slice!(@zones.index(zone))
+  def zone_exists?(name)
+    get_zone_by_name(name) != nil
+  end
+
+  def remove_zone(name)
+    if zone_exists?(name)
+      @zones.slice!(@zones.index(get_zone_by_name(name)))
       return true
     else
       return false
     end
   end
 
-  def insert_zone(name, options)
-    unless find_zone(name)
+  def add_zone(name, options)
+    unless zone_exists?(name)
       zone = Zone.new(name)
       zone.options = options
       @zones << zone
@@ -119,6 +123,10 @@ class NamedConf
     else
       return false
     end
+  end
+
+  def get_zone_by_name(name)
+    @zones.find { |zone| zone.name == name }
   end
 
   class Zone

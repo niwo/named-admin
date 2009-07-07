@@ -14,39 +14,45 @@ class NamedAdmin
     puts "Number of zones found: #{@nc.zones.size}"
   end
 
-  def search_zone(name = nil)
-    name = get_args("Enter zone name:") unless name
+  def find_zones(name = nil)
+    name = get_args("Enter zone name: ") unless name
     @nc.read
-    if zone = @nc.find_zone(name)
-      puts zone.print
+    zones = @nc.find_zones(name)
+    unless zones.empty? 
+      zones.each { |zone| puts zone.print }
     else
-      puts "Zone #{name} not found."
+      puts "No zone found named \"#{name}\"."
     end
   end
 
-  def insert_zone(name = nil)
-    name = get_args("Please enter the name of the zone you want to insert:") unless name
+  def add_zone(name = nil)
+    @nc.read
+    name = get_args("Please enter the name of the zone you want to insert: ") unless name
+    if @nc.zone_exists?(name)
+      puts "Abort: zone #{name} already exists."
+      exit
+    end
     if @zone_tmpl.keys.length > 1
-      template = get_args("Please select a zone template:\n#{list_zone_tmpl}", 2)
+      template = (get_args("Please select a zone template:\n#{list_zone_tmpl}", 2).to_i - 1)
     else
       template = 0
     end
     zone = template_to_zone(template.to_i, name)
-    @nc.read
-    if @nc.insert_zone(name, zone)
-      puts "Add zone #{name}:"
+    if @nc.add_zone(name, zone)
+      puts "Added zone #{name}:"
+      puts @nc.get_zone_by_name(name).print
       write(@nc)
     else
-      puts "Zone already exists."
+      puts "Error adding zone #{name}."
     end
   end
 
-  def delete_zone(name = nil)
+  def remove_zone(name = nil)
     name = get_args("Please enter the name of the zone you want to delete:") unless name
     @nc.read
     @nc.sort_zones
-    if @nc.delete_zone(name)
-      puts "Delete zone #{name}"
+    if @nc.remove_zone(name)
+      puts "Removed zone #{name}."
       write(@nc)
     else
       puts "Zone #{name} not found."
@@ -56,7 +62,7 @@ class NamedAdmin
   def parse
     @nc.read
     @nc.sort_zones
-    puts "file parsed and sorted."
+    puts "File parsed and sorted."
     write(@nc)
   end
 
@@ -70,6 +76,10 @@ class NamedAdmin
     error.empty? ?
       puts("named-checkconf: syntax of #{@file} OK") :
       puts("named-checkconf: syntax error in #{@file}: \n#{error}")
+  end
+
+  def bind_restart
+    puts %x[#{CONFIG['named-admin']['bind-restart-cmd']}]
   end
 
   private
