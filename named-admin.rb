@@ -17,13 +17,13 @@ require APP_PATH + "/lib/NamedAdmin"
 
 options = {}
 optparse = OptionParser.new do |opts|
-  opts.banner = "Usage: named-admin COMMAND [options]"
+  opts.banner = "Usage: named-admin COMMAND [argument] [options]"
   opts.program_name = "named-admin"
   opts.version = "1.1" 
   opts.separator ""
   opts.separator "List of Commands:"
   opts.separator ""
-  opts.separator "  find [name] \t\t Find zone(s) by name, asterix [*] can by used as wildcard"
+  opts.separator "  find [zone-name] \t\t Find zone(s) by name, asterix [*] can by used as wildcard"
   opts.separator "  count \t\t Count zones"
   opts.separator "  add [zone-name] \t Add a zone to the zone file"
   opts.separator "  remove [zone-name] \t Remove a zone from the zone file"
@@ -33,18 +33,24 @@ optparse = OptionParser.new do |opts|
   opts.separator "Options:"
 
   # Define the options, and what they do
-  #opts.on( '-z', '--zone-name ZONE', 'Name of zone to manipulate' ) do |zone|
-  #  options[:zone] = zone
-  #end
-
   options[:check] = true
-  opts.on( '--[no-]check', 'Checks the configuration with named-checkconf' ) do |check|
+  opts.on( '--[no-]check', 'Checks the configuration with named-checkconf after modifications (default: check)' ) do |check|
     options[:check] = check
+  end
+
+  options[:restart] = true
+  opts.on( '--[no-]restart', 'Option to restart named after zone manipulations (default: restart)' ) do |restart|
+    options[:restart] = restart
   end
 
   options[:file] = false
   opts.on( '-f', '--file FILE', 'Path to your named.conf file' ) do |file|
     options[:file] = file
+  end
+
+  options[:verbose] = false
+  opts.on( '-v', '--verbose', 'Output more information' ) do
+    options[:verbose] = true
   end
 
   opts.on_tail("-?", "--help", "Display this screen" ) do
@@ -65,6 +71,7 @@ end
 
 # get the command to execute
 options[:run] = ARGV[0]
+options[:arg] = ARGV[1]
 
 begin
   optparse.parse!
@@ -93,22 +100,22 @@ end
 
 options[:file] = CONFIG['named.conf']['path'] unless options[:file]
 
-na = NamedAdmin.new(options[:file], zone_tmpl)
-do_checkconf = false
+na = NamedAdmin.new(options[:file], zone_tmpl, options[:verbose])
 
+# indicator wheter the zone file file has been modified
+file_modifications = false
+
+# launch NamedAdmin with the option/parameters given
 begin
   case options[:run]
   when "find"
-    na.find_zones #(options[:zone])
+    na.find_zones(options[:arg])
   when "remove"
-    na.remove_zone #(options[:zone])
-    do_checkconf = true
+    file_modifications = na.remove_zone(options[:arg])
   when "add"
-    na.add_zone #(options[:zone])
-    do_checkconf = true
+    file_modifications = na.add_zone(options[:arg])
   when "parse"
-    na.parse
-    do_checkconf = true
+    file_modifications = na.parse
   when "count"
     na.count_zones
   when "print"
@@ -117,9 +124,20 @@ begin
     puts "Please provide an action argument."
     puts optparse.help
   end
-  if options[:check] && do_checkconf
-    na.named_checkconf
+
+  if file_modifications
+    # launch named-checkconf ?
+    if options[:check]
+      na.named_checkconf
+    else
+      puts "You should check check your zone file with named-checkconf."
+    end
+    # restart named ?
+    puts "Restart named for the changes to take effect."
+    if options[:restart]
+      na.named_restart()
+    end
   end
 rescue
-  puts "An error occured during execution: " + $!
+  puts "An error occured during execution: #{$!}"
 end

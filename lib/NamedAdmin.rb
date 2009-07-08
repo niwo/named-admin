@@ -2,14 +2,15 @@ require APP_PATH + "/lib/NamedConf"
 
 class NamedAdmin
   
-  def initialize(file, zone_tmpl = {})
+  def initialize(file, zone_tmpl = {}, verbose = false)
     @file = file
     @nc = NamedConf.new(@file)
     @zone_tmpl = zone_tmpl
+    @verbose = verbose
   end
   
   def count_zones
-    puts "Scanning #{@file}..."
+    puts "Scanning #{@file}..." if @verbose
     @nc.read
     puts "Number of zones found: #{@nc.zones.size}"
   end
@@ -18,44 +19,76 @@ class NamedAdmin
     name = get_args("Enter zone name: ") unless name
     @nc.read
     zones = @nc.find_zones(name)
-    unless zones.empty? 
-      zones.each { |zone| puts zone.print }
+    unless zones.empty?
+      puts "Find for \"#{name}\" found #{zones.size} zone#{'s' if zones.size > 1}:"
+      zones.each do |zone|
+        @verbose ? puts(zone.print) : puts(zone.name)
+      end
+      return true
     else
       puts "No zone found named \"#{name}\"."
+      return false
     end
   end
 
   def add_zone(name = nil)
+    # load the zones
     @nc.read
-    name = get_args("Please enter the name of the zone you want to insert: ") unless name
+
+    # ask for the zone name if not provided
+    name = get_args("Please enter the name of the zone you want to insert.\nzone-name: ") unless name
+
+    # make sure the zone doesn't already exist
     if @nc.zone_exists?(name)
       puts "Abort: zone #{name} already exists."
       exit
     end
+    
+    # check if the zone name is valid
+    if check_zone_name(name)
+      puts("#{name} seems to be a valid domain name.") if @verbose
+    else
+      puts("Warning: #{name} seems NOT to be a valid domain name!")
+      exit unless get_args("Do you really want to continue? [y/N]: ") == "y" 
+    end
+
+    # if there is more then one zone in the template, present the menu
     if @zone_tmpl.keys.length > 1
-      template = (get_args("Please select a zone template:\n#{list_zone_tmpl}", 2).to_i - 1)
+      template = (get_args("Please select a zone template:\n#{list_zone_tmpl}", true).to_i - 1)
     else
       template = 0
     end
+    
+    # parse the zone using the template
     zone = template_to_zone(template.to_i, name)
+
+    # insert the zone and ask wether it should be written to the zone file
     if @nc.add_zone(name, zone)
       puts "Added zone #{name}:"
       puts @nc.get_zone_by_name(name).print
       write(@nc)
+      return true
     else
       puts "Error adding zone #{name}."
+      return false
     end
   end
 
   def remove_zone(name = nil)
-    name = get_args("Please enter the name of the zone you want to delete:") unless name
+    # ask for the zone name if not provided
+    name = get_args("Please enter the name of the zone you want to delete\nzone-name: ") unless name
+    
+    # load the zones
     @nc.read
-    @nc.sort_zones
+    
+    # remove the zone and ask wether it should be written to the zone file
     if @nc.remove_zone(name)
       puts "Removed zone #{name}."
       write(@nc)
+      return true
     else
       puts "Zone #{name} not found."
+      return false
     end
   end
 
@@ -65,6 +98,10 @@ class NamedAdmin
     puts "File parsed and sorted."
     write(@nc)
   end
+ 
+  def check_zone_name(name)
+    (name =~ /^[-A-Z0-9.]+$/i) != nil
+  end
 
   def print_file
     @nc.read
@@ -73,20 +110,27 @@ class NamedAdmin
   
   def named_checkconf
     error = %x[#{CONFIG['named-checkconf']['path']} #{@file}]
-    error.empty? ?
-      puts("named-checkconf: syntax of #{@file} OK") :
+    if error.empty?
+      puts("named-checkconf: syntax of #{@file} OK")
+      return true
+    else
       puts("named-checkconf: syntax error in #{@file}: \n#{error}")
+      return false
+    end
   end
 
-  def bind_restart
-    puts %x[#{CONFIG['named-admin']['bind-restart-cmd']}]
+  def named_restart(confirm = true)
+    answer = get_args("Do you want to restart named? [y/N]: ") if confirm
+    if confirm && (answer != "y")
+      return false
+    end
+    system("#{CONFIG['named.conf']['named-restart-cmd']}")
   end
 
   private
 
   def write(nc)
-    print "Write changes to #{@file} [y/N]: "
-    if $stdin.gets.chomp == 'y'
+    if get_args("Write changes to #{@file} [y/N]: ") == "y"
       begin 
         nc.write
       rescue => message 
@@ -94,18 +138,16 @@ class NamedAdmin
         exit
       end
       puts "Succesfully written."
+      return true
     else
       puts "Exit without write."
+      return false
     end
   end
 
-  def get_args(text, arg = 1)
-    if ARGV[arg]
-      return ARGV[arg]
-    else
-      puts text
-      return $stdin.gets.chomp!
-    end
+  def get_args(text, newline = false)
+    newline ? puts(text) : print(text)
+    return $stdin.gets.chomp!
   end
 
   def list_zone_tmpl
