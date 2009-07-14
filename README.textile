@@ -4,7 +4,7 @@ named-admin is a command line tool for bind named.conf zone administration.
 
 Reads, writes and sorts the file and finds, inserts, deletes and counts zones.
 * zones can be inserted based on customizable zone templates
-* the find action accepts wildcards (*) and is handy to find all zones of a certain domain
+* the find action accepts wildcards (*) i.e. to find all zones of a certain domain
 * zones will be alphabetically sorted within your configuration file after each manipulation
 * option to automatically check the zone file syntax after manipulations with named-checkconf
 * option to aks for a named service restart after changes on the named configuration
