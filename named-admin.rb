@@ -6,10 +6,8 @@
 
 # resolve the application path
 if File.symlink?(__FILE__)
-  #APP_PATH = File.dirname(File.readlink(__FILE__))
   $: << APP_PATH = File.expand_path(File.dirname(File.readlink(__FILE__) + "/../lib"))
 else
-  # APP_PATH = File.dirname(__FILE__)
   $: << APP_PATH = File.expand_path(File.dirname(__FILE__) + "/../lib")
 end
 
