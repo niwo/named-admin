@@ -3,7 +3,11 @@ h1. named-admin
 named-admin is a command line tool for bind named.conf zone administration.
 
 Reads, writes and sorts the file and finds, inserts, deletes and counts zones.
-Zones can be inserted based on customizable zone templates.
+* zones can be inserted based on customizable zone templates
+* the find action accepts wildcards (*) and is handy to find all zones of a certain domain
+* zones will be alphabetically sorted within your configuration file after each manipulation
+* option to automatically check the zone file syntax after manipulations with named-checkconf
+* option to aks for a named service restart after changes on the named configuration
 
 h2. Usage
 
@@ -11,9 +15,9 @@ Launch the main ruby script: <code>named-admin COMMAND [argument] [options]</cod
 
 h3. Examples
 
-find all zones which begin with "example": <code>named-admin find example*</code>
-add a zone named "example.org": <code>named-admin add example.org</code>
-remove the zone "example.org", check the zone file but don't ask to restart named: <code>named-admin remove example.org --check --no-restart</code>
+* find all zones which begin with "example": <code>named-admin find example*</code>
+* add a zone named "example.org": <code>named-admin add example.org</code>
+* remove the zone "example.org", check the zone file but don't ask to restart named: <code>named-admin remove example.org --check --no-restart</code>
 
 Check out <code>named-admin --help</code> for commands and options.
 

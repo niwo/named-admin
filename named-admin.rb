@@ -123,7 +123,7 @@ na = NamedAdmin.new(options[:named_conf_file],
                     options[:verbose]
                    )
 
-# indicator wheter the zone file has been modified
+# indicator whether the zone file has been modified
 file_modifications = false
 
 # launch NamedAdmin with the option/parameters given
