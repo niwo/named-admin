@@ -1,12 +1,30 @@
-require APP_PATH + "/lib/NamedConf"
+#!/usr/bin/env ruby
+
+require "logger"
+require "lib/NamedConf"
 
 class NamedAdmin
-  
-  def initialize(file, zone_tmpl = {}, verbose = false)
+  def initialize(file,
+                 zone_tmpl,
+                 log_file,
+                 log_enable  = true,
+                 chk_path    = "/usr/sbin/named-checkconf",
+                 restart_cmd = "service named restart",
+                 verbose     = false
+                )
     @file = file
     @nc = NamedConf.new(@file)
     @zone_tmpl = zone_tmpl
+    @log_enable = log_enable
+    @log_file = log_file
+    @chk_path = chk_path
+    @restart_cmd = restart_cmd
     @verbose = verbose
+    if @log_enable
+      log_file ||= File.expand_path(File.dirname(__FILE__) + "/../log/named-admin.log")
+      log = File.open(log_file, File::WRONLY | File::APPEND | File::CREAT)
+      @log = Logger.new(log, 10, 1024000)
+    end
   end
   
   def count_zones
@@ -66,7 +84,7 @@ class NamedAdmin
     if @nc.add_zone(name, zone)
       puts "Added zone #{name}:"
       puts @nc.get_zone_by_name(name).print
-      write(@nc)
+      write(@nc, "add zone", name)
       return true
     else
       puts "Error adding zone #{name}."
@@ -84,7 +102,7 @@ class NamedAdmin
     # remove the zone and ask wether it should be written to the zone file
     if @nc.remove_zone(name)
       puts "Removed zone #{name}."
-      write(@nc)
+      write(@nc, "remove zone", name)
       return true
     else
       puts "Zone #{name} not found."
@@ -109,7 +127,7 @@ class NamedAdmin
   end
   
   def named_checkconf
-    error = %x[#{CONFIG['named-checkconf']['path']} #{@file}]
+    error = %x[#{@chk_path} #{@file}]
     if error.empty?
       puts("named-checkconf: syntax of #{@file} OK")
       return true
@@ -120,31 +138,34 @@ class NamedAdmin
   end
 
   def named_restart(confirm = true)
-    answer = get_args("Do you want to restart named? [y/N]: ") if confirm
+    answer = get_args("Do you want to restart named \"#{@restart_cmd}\" ? [y/N]: ") if confirm
     if confirm && (answer != "y")
       return false
     end
-    system("#{CONFIG['named.conf']['named-restart-cmd']}")
+    system("#{@restart_cmd}")
   end
 
   private
 
-  def write(nc)
+  def write(nc, action, zone)
     if get_args("Write changes to #{@file} [y/N]: ") == "y"
       begin 
         nc.write
-      rescue => message 
-        puts message
+        info = "Action: #{action}, Zone: #{zone}, File: #{@file}: "
+      rescue => error
+        puts error
+        @log.fatal(info + error) if @log_enabel
         exit
       end
       puts "Succesfully written."
+      @log.info(info + "modification successfully written") if @log_enabel
       return true
     else
       puts "Exit without write."
       return false
     end
   end
-
+  
   def get_args(text, newline = false)
     newline ? puts(text) : print(text)
     return $stdin.gets.chomp!

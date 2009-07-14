@@ -5,23 +5,39 @@ named-admin is a command line tool for bind named.conf zone administration.
 Reads, writes and sorts the file and finds, inserts, deletes and counts zones.
 Zones can be inserted based on customizable zone templates.
 
-h1. Usage
+h2. Usage
 
-Launch the main ruby script: named-admin COMMAND [options]
+Launch the main ruby script: <code>named-admin COMMAND [argument] [options]</code>
+
+h3. Examples
+
+find all zones which begin with "example": <code>named-admin find example*</code>
+add a zone named "example.org": <code>named-admin add example.org</code>
+remove the zone "example.org", check the zone file but don't ask to restart named: <code>named-admin remove example.org --check --no-restart</code>
 
 Check out <code>named-admin --help</code> for commands and options.
 
-h1. Configuration
+h2 Installation
+* Download named-admin and move it to the desired application directory (i.e. /usr/local/share/named-admin)
+* Create a symlink in order to have named-admin in your execution path
+** <code>ln -s /usr/local/share/named-admin/named-admin.rb /usr/local/sbin/named-admin</code>
+* Copy the two configuration files from the templates and adapt them to your needs:
+** copy the base configuration file: <code>cp config/config.yml.dist config/config.yml</code>
+** copy the zone templates file: <code>cp config/zones.yml.dist config/zones.yml</code>
+* have fun and start using named-admin to simplify your daily named zone management!
 
-h2. config/config.yml
+h2. Configuration
+
+h3. config/config.yml
 
 * specify the default path to you named.conf bind configuration file
 * activate automatic syntax checking with named-checkconf
+* configure whether to ask for a named restart after configuration changes
 
-h2. config/zones.yml
+h3. config/zones.yml
 
 * define different zone templates which can be used by the "add zone" action
 
-h1. Credits
+h2. Credits
 
 Copyright (C) 2009 Nik Wolfgramm, released under the MIT license

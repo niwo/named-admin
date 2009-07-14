@@ -1,0 +1,15 @@
+#
+# base configuration file for named-admin
+#
+
+# specify the location of the named.conf file
+zone_file:         '/etc/named.conf'
+restart_cmd:       'service named restart'
+
+# configuration of logging
+log_enable:        true
+log_file:          'log/named-admin.log'
+
+# settings for automatically testing the configuration with named-checkconf
+checkconf_path:    '/usr/sbin/named-checkconf'
+checkconf_enable:  false

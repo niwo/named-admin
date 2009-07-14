@@ -1,0 +1,4 @@
+I, [2009-07-10T11:36:19.538617 #13742]  INFO -- : Action: add zone, Zone: nik.com, File: /var/named/chroot/etc/named.local-zones.conf: modification successfully written
+I, [2009-07-10T11:48:24.296397 #14914]  INFO -- : Action: remove zone, Zone: nik.com, File: /var/named/chroot/etc/named.local-zones.conf: modification successfully written
+I, [2009-07-10T11:50:20.986804 #14926]  INFO -- : Action: add zone, Zone: nik.com, File: /var/named/chroot/etc/named.local-zones.conf: modification successfully written
+I, [2009-07-10T11:51:29.869875 #14992]  INFO -- : Action: remove zone, Zone: nik.com, File: /var/named/chroot/etc/named.local-zones.conf: modification successfully written
