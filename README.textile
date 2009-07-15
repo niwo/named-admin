@@ -40,28 +40,31 @@ h3. config/config.yml
 * configure whether to ask for a named restart after configuration changes
 
 *Example config.yml:*
+
+<pre>
 <code>
-#
-# base configuration file for named-admin
-#
+ #
+ # base configuration file for named-admin
+ #
 
-# specify the location of the named.conf or
-# the file which contains you named zone configurations
-named_zone_file:   '/etc/named.conf'
+ # specify the location of the named.conf or
+ # the file which contains you named zone configurations
+ named_zone_file:   '/etc/named.conf'
 
-# Define the command to execute in order to restart named
-# and reload the configuration
-restart_cmd:       'service named restart'
-restart_enable:    true
+ # Define the command to execute in order to restart named
+ # and reload the configuration
+ restart_cmd:       'service named restart'
+ restart_enable:    true
 
-# configuration of logging
-log_enable:        true
-log_file:          '/var/log/named-admin.log'
+ # configuration of logging
+ log_enable:        true
+ log_file:          '/var/log/named-admin.log'
 
-# settings for automatically testing the configuration with named-checkconf
-checkconf_path:    '/usr/sbin/named-checkconf'
-checkconf_enable:  false
+ # settings for automatically testing the configuration with named-checkconf
+ checkconf_path:    '/usr/sbin/named-checkconf'
+ checkconf_enable:  false
 </code>
+</pre>
 
 h3. config/zones.yml
 
@@ -69,23 +72,24 @@ h3. config/zones.yml
 
 *Example zones.yml:*
 
+<pre>
 <code>
-# define your default zone settings
-# {{name}} is replaced by the real zone name
+ # define your default zone settings
+ # {{name}} is replaced by the real zone name
 
-example-slave:
+ example-slave:
     type: slave
     masters: '{ 192.168.1.1; 192.168.1.2; }'
     allow-query: '{ any; }'
     file: '"{{name}}.db"'
 
-example-master:
+ example-master:
     type: master
     also-notify: '{ 192.168.1.3; 192.168.1.4; }'
     allow-query: '{ none; }'
     file: '"{{name}}.db"'
 </code>
-
+</pre>
 
 h2. Credits
 
