@@ -6,10 +6,11 @@
 
 # resolve the application path
 if File.symlink?(__FILE__)
-  $: << APP_PATH = File.expand_path(File.dirname(File.readlink(__FILE__) + "/../lib"))
+  APP_PATH = File.expand_path(File.dirname(File.readlink(__FILE__)))
 else
-  $: << APP_PATH = File.expand_path(File.dirname(__FILE__) + "/../lib")
+  APP_PATH = File.expand_path(File.dirname(__FILE__))
 end
+$: << File.expand_path(APP_PATH + "/../lib")
 
 require "yaml"
 require "optparse"

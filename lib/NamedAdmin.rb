@@ -84,8 +84,7 @@ class NamedAdmin
     if @nc.add_zone(name, zone)
       puts "Added zone #{name}:"
       puts @nc.get_zone_by_name(name).print
-      write(@nc, "add zone", name)
-      return true
+      return write(@nc, "add zone", name)
     else
       puts "Error adding zone #{name}."
       return false
@@ -102,8 +101,7 @@ class NamedAdmin
     # remove the zone and ask wether it should be written to the zone file
     if @nc.remove_zone(name)
       puts "Removed zone #{name}."
-      write(@nc, "remove zone", name)
-      return true
+      return write(@nc, "remove zone", name)
     else
       puts "Zone #{name} not found."
       return false
