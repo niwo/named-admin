@@ -21,7 +21,8 @@ h3. Examples
 
 Check out <code>named-admin --help</code> for commands and options.
 
-h2 Installation
+h2. Installation
+
 * Download named-admin and move it to the desired application directory (i.e. /usr/local/share/named-admin)
 * Create a symlink in order to have named-admin in your execution path
 ** <code>ln -s /usr/local/share/named-admin/named-admin.rb /usr/local/sbin/named-admin</code>
@@ -38,9 +39,53 @@ h3. config/config.yml
 * activate automatic syntax checking with named-checkconf
 * configure whether to ask for a named restart after configuration changes
 
+*Example config.yml:*
+<code>
+#
+# base configuration file for named-admin
+#
+
+# specify the location of the named.conf or
+# the file which contains you named zone configurations
+named_zone_file:   '/etc/named.conf'
+
+# Define the command to execute in order to restart named
+# and reload the configuration
+restart_cmd:       'service named restart'
+restart_enable:    true
+
+# configuration of logging
+log_enable:        true
+log_file:          '/var/log/named-admin.log'
+
+# settings for automatically testing the configuration with named-checkconf
+checkconf_path:    '/usr/sbin/named-checkconf'
+checkconf_enable:  false
+</code>
+
 h3. config/zones.yml
 
 * define different zone templates which can be used by the "add zone" action
+
+*Example zones.yml:*
+
+<code>
+# define your default zone settings
+# {{name}} is replaced by the real zone name
+
+example-slave:
+    type: slave
+    masters: '{ 192.168.1.1; 192.168.1.2; }'
+    allow-query: '{ any; }'
+    file: '"{{name}}.db"'
+
+example-master:
+    type: master
+    also-notify: '{ 192.168.1.3; 192.168.1.4; }'
+    allow-query: '{ none; }'
+    file: '"{{name}}.db"'
+</code>
+
 
 h2. Credits
 
