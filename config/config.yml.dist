@@ -8,7 +8,7 @@ named_zone_file:   '/etc/named.conf'
 
 # Define the command to execute in order to restart named
 # and reload the configuration
-restart_cmd:       'service named restart'
+restart_cmd:       '/sbin/service named restart'
 restart_enable:    true
 
 # configuration of logging

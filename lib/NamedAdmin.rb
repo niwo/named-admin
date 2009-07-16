@@ -26,6 +26,13 @@ class NamedAdmin
       @log = Logger.new(log, 10, 1024000)
     end
   end
+
+  # handle Control-C nicely
+  trap("INT") do 
+    puts
+    STDERR.puts "received Control-C: exit"
+    exit
+  end
   
   def count_zones
     puts "Scanning #{@file}..." if @verbose
@@ -140,7 +147,7 @@ class NamedAdmin
     if confirm && (answer != "y")
       return false
     end
-    system("#{@restart_cmd}")
+    system("#{@restart_cmd} 2>&1")
   end
 
   private

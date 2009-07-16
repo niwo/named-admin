@@ -10,7 +10,7 @@ if File.symlink?(__FILE__)
 else
   APP_PATH = File.expand_path(File.dirname(__FILE__))
 end
-$: << File.expand_path(APP_PATH + "/../lib")
+$: << File.expand_path(APP_PATH, "/../lib")
 
 require "yaml"
 require "optparse"
@@ -53,16 +53,6 @@ optparse = OptionParser.new do |opts|
   opts.separator "Options:"
 
   # Define the options, and what they do
-  options[:check] = CONFIG['checkconf_enable'] || true
-  opts.on( '--[no-]check', 'Checks the configuration with named-checkconf after modifications (default: check)' ) do |check|
-    options[:check] = check
-  end
-
-  options[:restart] = CONFIG['restart_enable'] || true
-  opts.on( '--[no-]restart', 'Option to restart named after zone manipulations (default: restart)' ) do |restart|
-    options[:restart] = restart
-  end
-
   options[:named_conf_file] = CONFIG['named_zone_file']
   opts.on( '-f', '--file FILE', 'Path to your named zone configuration file' ) do |file|
     options[:named_conf_file] = file
@@ -71,6 +61,16 @@ optparse = OptionParser.new do |opts|
   options[:verbose] = false
   opts.on( '-v', '--verbose', 'Output more information' ) do
     options[:verbose] = true
+  end
+
+  options[:check] = CONFIG['checkconf_enable'] || true
+  opts.on( '--[no-]check', 'Checks the configuration with named-checkconf after modifications (default: check)' ) do |check|
+    options[:check] = check
+  end
+
+  options[:restart] = CONFIG['restart_enable'] || true
+  opts.on( '--[no-]restart', 'Option to restart named after zone manipulations (default: restart)' ) do |restart|
+    options[:restart] = restart
   end
 
   opts.on_tail("-?", "--help", "Display this screen" ) do
@@ -91,42 +91,43 @@ end
 
 begin
   optparse.parse!
-rescue OptionParser::InvalidOption
-   print "Invalide option provided."
+rescue
+   puts "Invalide option provided."
    puts optparse.help
   exit
 end
 
-# get the command to execute
-options[:run] = ARGV[0]
-options[:arg] = ARGV[1] 
 
-# for adding a new zone a zones template must exist
-if (options[:run] == "add") && !(File.exists?(options[:zone_tmpl_file]))
-  puts "Please create a zone template file in order to insert zones."
-  puts "An example can be found at config/zones.yml.dist"
-  exit
-elsif !File.exists?(options[:zone_tmpl_file])
-  zone_tmpl = {}
-else
-  zone_tmpl = YAML.load_file(options[:zone_tmpl_file]) || {}
-end
-
-# create an NamedAdmin instance to handle the calls
-na = NamedAdmin.new(options[:named_conf_file],
-                    zone_tmpl,
-                    options[:log_file],
-                    options[:log_enable],
-                    options[:checkconf_path],
-                    options[:restart_cmd],
-                    options[:verbose]
-                   )
-
-# indicator whether the zone file has been modified
-file_modifications = false
-
-# launch NamedAdmin with the option/parameters given
 begin
+  # get the command to execute
+  options[:run] = ARGV[0]
+  options[:arg] = ARGV[1] 
+
+  # for adding a new zone a zones template must exist
+  if (options[:run] == "add") && !(File.exists?(options[:zone_tmpl_file]))
+    puts "Please create a zone template file in order to insert zones."
+    puts "An example can be found at config/zones.yml.dist"
+    exit
+  elsif !File.exists?(options[:zone_tmpl_file])
+    zone_tmpl = {}
+  else
+    zone_tmpl = YAML.load_file(options[:zone_tmpl_file]) || {}
+  end
+
+  # create an NamedAdmin instance to handle the calls
+  na = NamedAdmin.new(options[:named_conf_file],
+                      zone_tmpl,
+                      options[:log_file],
+                      options[:log_enable],
+                      options[:checkconf_path],
+                      options[:restart_cmd],
+                      options[:verbose]
+                     )
+
+  # indicator whether the zone file has been modified
+  file_modifications = false
+
+  # launch NamedAdmin with the option/parameters given
   case options[:run]
   when "find"
     na.find_zones(options[:arg])
@@ -150,7 +151,7 @@ begin
     if options[:check]
       na.named_checkconf
     else
-      puts "You should check check your zone file with named-checkconf."
+      puts "You should check your zone file with named-checkconf."
     end
     # restart named ?
     puts "Restart named for the changes to take effect."
