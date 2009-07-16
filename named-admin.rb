@@ -63,12 +63,12 @@ optparse = OptionParser.new do |opts|
     options[:verbose] = true
   end
 
-  options[:check] = CONFIG['checkconf_enable'] || true
+  options[:check] = CONFIG['checkconf_enable']
   opts.on( '--[no-]check', 'Checks the configuration with named-checkconf after modifications (default: check)' ) do |check|
     options[:check] = check
   end
 
-  options[:restart] = CONFIG['restart_enable'] || true
+  options[:restart] = CONFIG['restart_enable']
   opts.on( '--[no-]restart', 'Option to restart named after zone manipulations (default: restart)' ) do |restart|
     options[:restart] = restart
   end
@@ -113,7 +113,7 @@ begin
   else
     zone_tmpl = YAML.load_file(options[:zone_tmpl_file]) || {}
   end
-
+ 
   # create an NamedAdmin instance to handle the calls
   na = NamedAdmin.new(options[:named_conf_file],
                       zone_tmpl,

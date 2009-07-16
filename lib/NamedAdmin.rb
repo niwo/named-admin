@@ -159,11 +159,11 @@ class NamedAdmin
         info = "Action: #{action}, Zone: #{zone}, File: #{@file}: "
       rescue => error
         puts error
-        @log.fatal(info + error) if @log_enabel
+        @log.fatal(info + error) if @log_enable
         exit
       end
       puts "Succesfully written."
-      @log.info(info + "modification successfully written") if @log_enabel
+      @log.info(info + "modification successfully written") if @log_enable
       return true
     else
       puts "Exit without write."
