@@ -43,12 +43,14 @@ optparse = OptionParser.new do |opts|
   opts.version = "1.1" 
   opts.separator ""
   opts.separator "List of Commands:"
-  opts.separator "  find [zone-name] \t Find zone(s) by name, asterix [*] can by used as wildcard"
+  opts.separator "  add \t [zone] \t Add a zone to the zone file"
+  opts.separator "  remove [zone] \t Remove a zone from the zone file"
+  opts.separator "  find \t [zone] \t Find zone(s) by name"
+  opts.separator "  \t\t\t asterix (*) can by used as wildcard"
   opts.separator "  count \t\t Count zones"
-  opts.separator "  add [zone-name] \t Add a zone to the zone file"
-  opts.separator "  remove [zone-name] \t Remove a zone from the zone file"
   opts.separator "  print \t\t Print all zones (parsed, sorted)"
-  opts.separator "  parse \t\t Parse all zones and write them back to the zone file (parsed, sorted)"
+  opts.separator "  parse \t\t Parse all zones and write them back"
+  opts.separator "  \t\t\t to the zone file (parsed, sorted)"
   opts.separator ""
   opts.separator "Options:"
 
@@ -64,12 +66,14 @@ optparse = OptionParser.new do |opts|
   end
 
   options[:check] = CONFIG['checkconf_enable']
-  opts.on( '--[no-]check', 'Checks the configuration with named-checkconf after modifications (default: check)' ) do |check|
+  opts.on( '--[no-]check', 'Checks the configuration with named-checkconf',
+                           'after modifications (default: check)' ) do |check|
     options[:check] = check
   end
 
   options[:restart] = CONFIG['restart_enable']
-  opts.on( '--[no-]restart', 'Option to restart named after zone manipulations (default: restart)' ) do |restart|
+  opts.on( '--[no-]restart', 'Option to restart named',
+                              'after zone manipulations (default: restart)' ) do |restart|
     options[:restart] = restart
   end
 
@@ -93,6 +97,7 @@ begin
   optparse.parse!
 rescue
    puts "Invalide option provided."
+   puts
    puts optparse.help
   exit
 end
@@ -143,6 +148,7 @@ begin
     na.print_file
   else
     puts "Please provide an action argument."
+    puts
     puts optparse.help
   end
 
