@@ -119,7 +119,7 @@ class NamedAdmin
     @nc.read
     @nc.sort_zones
     puts "File parsed and sorted."
-    write(@nc)
+    write(@nc, "parse", "all")
   end
  
   def check_zone_name(name)
